@@ -42,6 +42,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 
 ADD --chown=nginx:nginx /nginx.conf /etc/nginx/http.d/default.conf
 ADD --chown=nginx:nginx /php-fpm.conf /etc/php/php-fpm.d/www.conf
+ADD --chown=nginx:nginx /config.php /var/www/html
 ADD --chmod=0755 docker-entrypoint.sh /
 
 USER nginx
