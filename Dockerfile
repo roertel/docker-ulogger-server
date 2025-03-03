@@ -1,6 +1,9 @@
 FROM alpine:3
 
 LABEL maintainer="Ryan Oertel (https://github.com/roertel)"
+LABEL org.opencontainers.image.source=https://github.com/roertel/docker-ulogger-server
+LABEL org.opencontainers.image.description="uLogger container image"
+LABEL org.opencontainers.image.licenses=GPL3
 
 ARG ulogger_tag=v1.2
 ARG php_version=83
