@@ -35,6 +35,8 @@ RUN rm -rf \
   /var/www/html/LICENSE       \
   /var/www/html/index.html
 
+RUN sed -i "s/\$enabled = false;/\$enabled = getenv('ULOGGER_SETUP');/" /var/www/html/scripts/setup.php;
+
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
   ln -sf /dev/stderr /var/log/nginx/error.log && \
   ln -sf /dev/stdout /var/log/php${php_version}/error.log && \
