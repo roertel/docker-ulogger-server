@@ -9,6 +9,7 @@ For example, `ULOGGER_lang=en`. Variables may be case sensitive.
 
 |Key|Default|Description|
 |:-|:-|:-|
+|setup|`false`|Enable setup script.|
 |dbdsn||PDO data source name. Ex:<br/>`mysql:host=localhost;port=3307;dbname=ulogger;charset=utf8`<br/>`mysql:unix_socket=/path/to/mysql.sock;dbname=ulogger;charset=utf8`<br/>`pgsql:host=localhost;port=5432;dbname=ulogger`<br/>`sqlite:/path/to/ulogger.db`|
 |dbuser||Database user name.|
 |dbpass||Database user password.|
