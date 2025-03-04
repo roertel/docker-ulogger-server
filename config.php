@@ -1,11 +1,12 @@
 <?php
 // Dynamically configure ulogger variables from environment variables.
 
-if (getenv("ULOGGER_DEBUG")) $ULOGGER_DEBUG=1;
+$DEBUG = getenv("ULOGGER_DEBUG");
 
 foreach (preg_grep("/^ULOGGER_/", array_keys(getenv())) as $key) {
-  ${$key} = getenv($key);
-  if ($ULOGGER_DEBUG) echo "$key=" . ${$key} . "\n";
+  $var = str_replace("ULOGGER_", "", $key);
+  ${$var} = getenv($key);
+  if ($DEBUG) echo  "$var=" . ${$var} . "\n";
 }
 
 ?>
