@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-
+exit
 cd /var/www/html || exit
 
 ULOGGER_setup=1

@@ -13,7 +13,8 @@ ENV LANG=en_US.utf-8
 RUN apk add --no-cache \
   nginx \
   sqlite \
-  php${php_version}-cgi \
+  composer \
+  php${php_version} \
   php${php_version}-ctype \
   php${php_version}-fpm \
   php${php_version}-json \
@@ -26,6 +27,8 @@ RUN apk add --no-cache \
   php${php_version}-xmlwriter
 
 ADD --chown=nginx:nginx https://github.com/bfabiszewski/ulogger-server.git#$ulogger_tag /var/www/html/
+
+# RUN composer --working-dir=/var/www/html --with-all-dependencies update
 
 RUN rm -rf \
   /var/www/html/.docker       \
@@ -53,17 +56,14 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
   mkdir -p /var/local/db /docker-entrypoint.d && \
   chown -R nginx:nginx /var/run/nginx /var/local/db
 
-ADD --chown=nginx:nginx /nginx.conf /etc/nginx/http.d/default.conf
-ADD --chown=nginx:nginx /php-fpm.conf /etc/php/php-fpm.d/www.conf
-ADD --chown=nginx:nginx /config.php /var/www/html
-ADD --chmod=0755 docker-entrypoint.sh /
-ADD --chmod=0755 setup.sh /docker-entrypoint.d
+ADD --chown=nginx:nginx /container-files /
+RUN chmod 0755 /docker-entrypoint.sh /docker-entrypoint.d/setup.sh
 
 WORKDIR /var/www/html
 
 ENV ULOGGER_dbdsn sqlite:/var/local/db/ulogger.db
 
-USER nginx
+# USER nginx
 
 EXPOSE 8080
 
