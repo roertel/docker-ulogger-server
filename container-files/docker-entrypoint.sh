@@ -47,7 +47,7 @@ if [ -z "$1" ]; then
   fi
 
   nginx
-  php-fpm -F
+  php-fpm --nodaemonize
 
 else
   exec "$@"

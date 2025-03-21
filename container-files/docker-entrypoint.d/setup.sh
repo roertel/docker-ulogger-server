@@ -1,52 +1,40 @@
 #!/usr/bin/env sh
-exit
-cd /var/www/html || exit
 
-ULOGGER_setup=1
-GATEWAY_INTERFACE="CGI/1.1"
-CONTENT_TYPE="application/x-www-form-urlencoded"
-REMOTE_HOST=127.0.0.1
-HTTP_ACCEPT="text/html"
-CONTENT_LENGTH=6
-SCRIPT_FILENAME=post.php
-REQUEST_URI=/scripts/setup.php
-SERVER_PROTOCOL=HTTP/1.1
-REDIRECT_STATUS=200
-REQUEST_METHOD=POST
-SCRIPT_NAME=setup.php
-SCRIPT_FILENAME=scripts/setup.php
-SERVER_NAME=example.com
-POST_DATA="command=setup"
-CONTENT_LENGTH="$(printf "%s" "$POST_DATA" | wc -m)"
+# Initialize database if needed, add users if none
 
-export ULOGGER_setup GATEWAY_INTERFACE CONTENT_TYPE REMOTE_HOST HTTP_ACCEPT \
-  CONTENT_LENGTH SCRIPT_FILENAME REQUEST_URI SERVER_PROTOCOL REDIRECT_STATUS \
-  REQUEST_METHOD SCRIPT_NAME SCRIPT_FILENAME SERVER_NAME POST_DATA CONTENT_LENGTH
+cd /var/www/html || exit 1
 
-# Back up the tracks and positions for sqlite
-DBTYPE="$(printf "%s" "$ULOGGER_dbdsn" | cut -d: -f1)"
-DBFILE="$(printf "%s" "$ULOGGER_dbdsn" | cut -d: -f2)"
+# Update setup script to read from environment variables instead
+# of POST or GET variables
 
-if [ "$DBTYPE" = "sqlite" ]; then
-  sqlite3 "$DBFILE" ".dump --data-only tracks positions" > "$DBFILE.sql"
+sed -i -f - scripts/setup.php <<- SED
+  s/^\(\s*\$enabled = \)false;/\1getenv('ULOGGER_setup');/;
+  s/^\(\s*\$\(.*\) = \)uUtils::.*;/\1getenv('ULOGGER_\2');/;
+SED
+
+echo "Checking installation"
+if ! php -r 'if (!defined("ROOT_DIR")) { define("ROOT_DIR", __DIR__); }
+  require_once(ROOT_DIR . "/helpers/user.php");
+  (uUser::getAll()===false) ? exit(1) : exit(0);'; then
+
+  echo "Configuring uLogger database"
+  ULOGGER_command=setup \
+  ULOGGER_setup=1 \
+  php scripts/setup.php \
+  | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
+
+  if [ -f /var/run/secrets/users ]; then
+    echo "Adding users"
+    while read -r ULOGGER_login ULOGGER_pass; do
+      echo "Adding user $ULOGGER_login"
+      ULOGGER_command=adduser \
+      ULOGGER_setup=1 \
+      php scripts/setup.php \
+      | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
+    done < /var/run/secrets/users
+  else
+    echo "Not adding users: No users file found"
+  fi
 fi
 
-# Re-setup the app
-printf "%s" $POST_DATA | php-cgi | sed -n 's:.*<span.*>\(.*\)</span>.*:\1:p'
-
-# Add users
-if [ -f "users" ]; then
-  while IFS= read -r line; do
-    POST_DATA="$line"
-    CONTENT_LENGTH="$(printf "%s" "$POST_DATA" | wc -m)"
-
-    export POST_DATA CONTENT_LENGTH
-
-    printf "%s" "$POST_DATA" | php-cgi | sed -n 's:.*<span.*>\(.*\)</span>.*:\1:p'
-  done < "users"
-fi
-
-# Restore the backed up data
-if [ -f "$DBFILE.sql" ]; then
-  sqlite3 "$DBFILE" "$DBFILE.sql"
-fi
+echo "Done!"
