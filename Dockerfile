@@ -61,7 +61,7 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
 
 ADD --chown=nginx:nginx /container-files /
 
-RUN chmod 0755 /docker-entrypoint.sh /docker-entrypoint.d/setup.sh
+RUN chmod 0755 /docker-entrypoint.sh /docker-entrypoint.d/*
 
 ENV ULOGGER_dbdsn sqlite:/var/local/db/ulogger.db
 

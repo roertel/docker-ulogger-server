@@ -10,14 +10,14 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build_and_publish-image:
+  build-and-publish-image:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
       packages: write
-      attestations: write
       id-token: write
+      attestations: write
 
     steps:
       - name: "Checkout repository"
