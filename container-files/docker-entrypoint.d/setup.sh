@@ -23,15 +23,16 @@ if ! php -r 'if (!defined("ROOT_DIR")) { define("ROOT_DIR", __DIR__); }
   php scripts/setup.php \
   | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
 
-  if [ -f /var/run/secrets/users ]; then
+  if [ -n "$(ls -A /var/run/secrets/users)" ]; then
     echo "Adding users"
-    while read -r ULOGGER_login ULOGGER_pass; do
+    cat /var/run/secrets/users/* \
+    | while read -r ULOGGER_login ULOGGER_pass; do
       echo "Adding user $ULOGGER_login"
       ULOGGER_command=adduser \
       ULOGGER_setup=1 \
       php scripts/setup.php \
       | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
-    done < /var/run/secrets/users
+    done
   else
     echo "Not adding users: No users file found"
   fi
