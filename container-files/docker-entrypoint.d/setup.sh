@@ -23,15 +23,26 @@ if ! php -r 'if (!defined("ROOT_DIR")) { define("ROOT_DIR", __DIR__); }
   php scripts/setup.php \
   | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
 
-  if [ -n "$(ls -A /var/run/secrets/users)" ]; then
-    echo "Adding users"
-    cat /var/run/secrets/users/* \
-    | while read -r ULOGGER_login ULOGGER_pass; do
-      echo "Adding user $ULOGGER_login"
-      ULOGGER_command=adduser \
-      ULOGGER_setup=1 \
-      php scripts/setup.php \
-      | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
+  if [ -n "$(ls -A /var/run/secrets/users 2>/dev/null)" ]; then
+    for file in /var/run/secrets/users/*; do
+      if [ -f "${file}" ]; then
+        echo "Adding users from ${file}..."
+
+        while read -r ULOGGER_login ULOGGER_pass; do
+          echo "Adding user $ULOGGER_login"
+
+          export ULOGGER_login ULOGGER_pass
+
+          ULOGGER_command=adduser \
+          ULOGGER_setup=1 \
+          php scripts/setup.php \
+          | sed -n '/<p>/,/<\/p>/ s/<[^>]*>//g p'
+        done < "${file}"
+
+        echo "done"
+      else
+        echo "Error: ${file} is not a file"
+      fi
     done
   else
     echo "Not adding users: No users file found"
