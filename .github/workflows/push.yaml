@@ -45,11 +45,7 @@ jobs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
-<<<<<<< HEAD
           type=ref
-=======
-          type=ref,event=pr
->>>>>>> origin
 
     - name: "Build and push image"
       id: push
