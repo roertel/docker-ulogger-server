@@ -9,7 +9,7 @@ on:
     tags:
     - 'v*'
 
-  pull_reqeust:
+  pull_request:
     branches:
     - ${{ github.event.repository.default_branch }}
 
