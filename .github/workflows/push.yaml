@@ -1,14 +1,12 @@
 name: Build & publish Docker image
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - 'main'
     tags:
     - 'v*'
-  pull_request:
-    branches:
-    - 'main'
 
 env:
   REGISTRY: ghcr.io
@@ -44,7 +42,7 @@ jobs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
-          type=ref,event=pr
+          type=ref
 
     - name: "Build and push image"
       id: push
