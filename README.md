@@ -5,7 +5,7 @@ Dockerized &#x00B5;Logger Server
 
 The &#x00B5;logger docker container is configured with environment variables. The
 variables must all begin with ULOGGER_ and then the &#x00B5;logger variable name. 
-For example, `ULOGGER_lang=en`. Variables may be case sensitive. 
+For example, `ULOGGER_lang=en`. Variables may be case sensitive.
 
 |Key|Default|Description|
 |:-|:-|:-|
