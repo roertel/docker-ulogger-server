@@ -11,6 +11,7 @@ ARG php_version=83
 ENV LANG=en_US.utf-8
 
 RUN apk add --no-cache \
+  patch \
   nginx \
   sqlite \
   composer \
@@ -35,6 +36,21 @@ ADD --chown=nginx:nginx https://github.com/bfabiszewski/ulogger-server.git#$ulog
 
 RUN composer --with-all-dependencies --no-interaction --no-cache --no-progress update
 
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+ln -sf /dev/stderr /var/log/nginx/error.log && \
+ln -sf /dev/stdout /var/log/php${php_version}/error.log && \
+ln -sf /dev/stderr /var/log/php${php_version}/error.log && \
+ln -sf /usr/sbin/php-fpm${php_version} /usr/sbin/php-fpm && \
+ln -sf /var/www/html/icons/favicon.ico /var/www/html && \
+mv /etc/php${php_version} /etc/php && \
+ln -sf /etc/php /etc/php${php_version} && \
+mkdir -p /var/local/db && \
+chown -R nginx:nginx /var/run/nginx /var/local/db
+
+ADD --chown=nginx:nginx /container-files /
+
+RUN patch -p1 < external-auth.patch
+
 RUN rm -rf      \
   .docker       \
   .githooks     \
@@ -46,20 +62,8 @@ RUN rm -rf      \
   composer.lock \
   composer.json \
   LICENSE       \
-  index.html
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
-  ln -sf /dev/stderr /var/log/nginx/error.log && \
-  ln -sf /dev/stdout /var/log/php${php_version}/error.log && \
-  ln -sf /dev/stderr /var/log/php${php_version}/error.log && \
-  ln -sf /usr/sbin/php-fpm${php_version} /usr/sbin/php-fpm && \
-  ln -sf /var/www/html/icons/favicon.ico /var/www/html && \
-  mv /etc/php${php_version} /etc/php && \
-  ln -sf /etc/php /etc/php${php_version} && \
-  mkdir -p /var/local/db && \
-  chown -R nginx:nginx /var/run/nginx /var/local/db
-
-ADD --chown=nginx:nginx /container-files /
+  index.html    \
+  external-auth.patch
 
 RUN chmod 0755 /docker-entrypoint.sh /docker-entrypoint.d/*
 
