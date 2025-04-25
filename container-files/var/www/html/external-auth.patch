@@ -51,7 +51,7 @@ index daddd74..3a47c7c 100644
      if (!empty($login)) {
        try {
          $query = "SELECT id, login, password, admin FROM " . self::db()->table('users') . " WHERE login = ? LIMIT 1";
-@@ -47,6 +47,11 @@ class uUser {
+@@ -47,6 +47,12 @@ class uUser {
          $stmt->bindColumn('admin', $this->isAdmin, PDO::PARAM_BOOL);
          if ($stmt->fetch(PDO::FETCH_BOUND)) {
            $this->isValid = true;
