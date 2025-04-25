@@ -1,0 +1,65 @@
+diff --git a/helpers/auth.php b/helpers/auth.php
+index 4cf77f8..9fa46e9 100644
+--- a/helpers/auth.php
++++ b/helpers/auth.php
+@@ -38,6 +38,8 @@ class uAuth {
+     $user = uUser::getFromSession();
+     if ($user->isValid) {
+       $this->setAuthenticated($user);
++    } else {
++      $this->checkExternalLogin();
+     }
+   }
+ 
+@@ -207,4 +209,26 @@ class uAuth {
+     return ($this->isAuthenticated() || !uConfig::getInstance()->requireAuthentication) && uConfig::getInstance()->publicTracks;
+   }
+ 
++  /**
++   * Check valid external login
++   *
++   * @return boolean True if valid
++   */
++  public function checkExternalLogin() {
++    $headers = apache_request_headers();
++
++    if (isset($headers['X-Webauth-User'])) {
++      $user = new uUser($headers['X-Webauth-User'], true);
++
++      if ($user->isValid) {
++        error_log("Found user " . $headers['X-Webauth-User']);
++        $this->setAuthenticated($user);
++        $this->sessionCleanup();
++        $user->storeInSession();
++        return true;
++      }
++
++      return false;
++    }
++  }
+ }
+diff --git a/helpers/user.php b/helpers/user.php
+index daddd74..3a47c7c 100644
+--- a/helpers/user.php
++++ b/helpers/user.php
+@@ -35,7 +35,7 @@ class uUser {
+    *
+    * @param string $login Login
+    */
+-  public function __construct($login = null) {
++  public function __construct($login = null, $create = false) {
+     if (!empty($login)) {
+       try {
+         $query = "SELECT id, login, password, admin FROM " . self::db()->table('users') . " WHERE login = ? LIMIT 1";
+@@ -47,6 +47,11 @@ class uUser {
+         $stmt->bindColumn('admin', $this->isAdmin, PDO::PARAM_BOOL);
+         if ($stmt->fetch(PDO::FETCH_BOUND)) {
+           $this->isValid = true;
++	} elseif ($create) { // Create user if not found
++	  $pass = random_bytes(16);
++	  $this->id = $this->add($login, $pass);
++	  $this->hash = password_hash($pass, PASSWORD_DEFAULT);
++	  $this->isValid = true;
+         }
+       } catch (PDOException $e) {
+         // TODO: handle exception
