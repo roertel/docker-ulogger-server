@@ -18,7 +18,7 @@ index 4cf77f8..1ad930b 100644
 +
 +      // Remove external authentication cookies too
 +      if (isset($_SERVER['HTTP_COOKIE'])) {
-+        $cookies = exploe(';', $_SERVER['HTTP_COOKIE']);
++        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
 +        foreach($cookies as $cookie) {
 +          $parts = explode('=', $cookie);
 +          $name = trim($parts[0]);
