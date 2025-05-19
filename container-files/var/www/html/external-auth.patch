@@ -10,7 +10,7 @@ index 4cf77f8..1ad930b 100644
 +      $this->checkExternalLogin();
      }
    }
- 
+
 @@ -91,6 +93,17 @@ class uAuth {
          $params["path"], $params["domain"],
          $params["secure"], $params["httponly"]
@@ -32,7 +32,7 @@ index 4cf77f8..1ad930b 100644
 @@ -207,4 +220,26 @@ class uAuth {
      return ($this->isAuthenticated() || !uConfig::getInstance()->requireAuthentication) && uConfig::getInstance()->publicTracks;
    }
- 
+
 +  /**
 +   * Check valid external login
 +   *
@@ -57,7 +57,7 @@ index 4cf77f8..1ad930b 100644
 +  }
  }
 diff --git a/helpers/user.php b/helpers/user.php
-index daddd74..a9aeedd 100644
+index daddd74..80e0946 100644
 --- a/helpers/user.php
 +++ b/helpers/user.php
 @@ -35,7 +35,7 @@ class uUser {
@@ -82,3 +82,14 @@ index daddd74..a9aeedd 100644
          }
        } catch (PDOException $e) {
          // TODO: handle exception
+@@ -174,7 +180,9 @@ class uUser {
+    * @return bool True if matches, false otherwise
+    */
+   public function validPassword($password) {
+-    return password_verify($password, $this->hash);
++    $headers = getallheaders();
++    return isset($headers['X-Webauth-User'])
++      || password_verify($password, $this->hash);
+   }
+
+   /**
