@@ -10,7 +10,7 @@ index 4cf77f8..1ad930b 100644
 +      $this->checkExternalLogin();
      }
    }
- 
+
 @@ -91,6 +93,17 @@ class uAuth {
          $params["path"], $params["domain"],
          $params["secure"], $params["httponly"]
@@ -18,7 +18,7 @@ index 4cf77f8..1ad930b 100644
 +
 +      // Remove external authentication cookies too
 +      if (isset($_SERVER['HTTP_COOKIE'])) {
-+        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
++        $cookies = exploe(';', $_SERVER['HTTP_COOKIE']);
 +        foreach($cookies as $cookie) {
 +          $parts = explode('=', $cookie);
 +          $name = trim($parts[0]);
@@ -32,7 +32,7 @@ index 4cf77f8..1ad930b 100644
 @@ -207,4 +220,26 @@ class uAuth {
      return ($this->isAuthenticated() || !uConfig::getInstance()->requireAuthentication) && uConfig::getInstance()->publicTracks;
    }
- 
+
 +  /**
 +   * Check valid external login
 +   *
@@ -88,8 +88,8 @@ index daddd74..80e0946 100644
    public function validPassword($password) {
 -    return password_verify($password, $this->hash);
 +    $headers = getallheaders();
-+    return isset($headers['X-Webauth-User']) 
++    return isset($headers['X-Webauth-User'])
 +      || password_verify($password, $this->hash);
    }
- 
+
    /**
